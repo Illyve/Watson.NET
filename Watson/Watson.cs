@@ -1,74 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
-using CommandLine;
-using CommandLine.Text;
-using Watson.Converters;
+using System.Text;
+using System.Linq;
+using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using Newtonsoft.Json;
+using Watson.Converters;
 
 namespace Watson
 {
-	[Verb("encode", HelpText = "Converts a file of the specified format into Watson and outputs it into the standard output")]
-	public class EncodeOptions
+	public static class Watson
 	{
-		[Option('t', "type", Required = true, HelpText = "Specifies the type of the file to be converted")]
-		public string Type { get; set; }
-
-		[Option("initial-mode", Required = false, HelpText = "Specifies the initial mode of the lexer", Default = 'A')]
-		public char InitialMode { get; set; }
-
-		[Value(0, MetaName = "file", Required = false, HelpText = "The file to be converted. Will use standard input if not provided")]
-		public string File { get; set; }
-	}
-
-	[Verb("decode", HelpText = "Converts Watson files into the specified format and outputs it into the standard output")]
-	public class DecodeOptions
-	{
-		[Option('t', "type", Required = true, HelpText = "Specifies the type of the file to be converted")]
-		public string Type { get; set; }
-
-		[Option("initial-mode", Required = false, HelpText = "Specifies the initial mode of the lexer", Default = 'A')]
-		public char InitialMode { get; set; }
-
-		[Value(0, MetaName = "file", Required = false, HelpText = "The files to be converted, Will use standard input if not provided")]
-		public IEnumerable<string> Files { get; set; }
-	}
-
-	public class Watson
-	{
-		public static void Main(string[] args)
-		{
-			var parser = new CommandLine.Parser(settings => settings.HelpWriter = null);
-			var result = parser.ParseArguments<EncodeOptions, DecodeOptions>(args);
-			string output = result.MapResult(
-				(EncodeOptions options) => Encode(options),
-				(DecodeOptions options) => Decode(options),
-				(errs) => { DisplayHelp(result); return null; });
-
-			if (output != null)
-			{
-				Console.WriteLine(output);
-			}
-		}
-
-		static void DisplayHelp<T>(ParserResult<T> result)
-		{
-			var helpText = HelpText.AutoBuild(result, h =>
-			{
-				h.AdditionalNewLineAfterOption = false;
-				h.Heading = "Watson v0.1.0";
-				h.Copyright = "";
-				return h;
-			});
-
-			Console.WriteLine(helpText);
-		}
-
 		public static string Encode(EncodeOptions options)
 		{
-			var vm = new VM();
+			var vm = new VM(new Lexer(options.InitialMode));
 
 			string input;
 			if (options.File == null || !File.Exists(options.File))
@@ -80,70 +26,18 @@ namespace Watson
 				input = File.ReadAllText(options.File);
 			}
 
-			try
+			switch (options.Type)
 			{
-				switch (options.Type)
-				{
-					case "yaml": return YamlConverter.Encode(vm, input);
-					case "json": return Converters.JsonConverter.Encode(vm, input);
-					default:
-						Console.WriteLine($"Invalid file type");
-						return null;
-				}
-			}
-			catch (YamlException ye)
-			{
-				using (var reader = new StringReader(input))
-				{
-					string line;
-					int lineNumber = 0;
-					do
-					{
-						line = reader.ReadLine();
-						lineNumber++;
-					}
-					while (line != null && lineNumber < ye.Start.Line);
-					Console.WriteLine($"Invalid yaml on line {ye.Start.Line} column {ye.Start.Column}: {line}");
-				}
-				return null;
-			}
-			catch (JsonSerializationException je)
-			{
-				using (var reader = new StringReader(input))
-				{
-					string line;
-					int lineNumber = 0;
-					do
-					{
-						line = reader.ReadLine();
-						lineNumber++;
-					}
-					while (line != null && lineNumber < je.LineNumber);
-					Console.WriteLine($"Invalid yaml on line {je.LineNumber} column {je.LinePosition}: {line}");
-				}
-				return null;
-			}
-			catch (JsonReaderException je)
-			{
-				using (var reader = new StringReader(input))
-				{
-					string line;
-					int lineNumber = 0;
-					do
-					{
-						line = reader.ReadLine();
-						lineNumber++;
-					}
-					while (line != null && lineNumber < je.LineNumber);
-					Console.WriteLine($"Invalid yaml on line {je.LineNumber} column {je.LinePosition}: {line}");
-				}
-				return null;
+				case "yaml": return YamlConverter.Encode(vm, input);
+				case "json": return Converters.JsonConverter.Encode(vm, input);
+				default:
+					return null;
 			}
 		}
 
 		public static string Decode(DecodeOptions options)
 		{
-			var vm = new VM();
+			var vm = new VM(new Lexer(options.InitialMode));
 
 			string input;
 			if (options.Files.Count() == 0)
@@ -152,24 +46,20 @@ namespace Watson
 			}
 			else
 			{
-				input = File.ReadAllText(options.Files.First());
+				var sb = new StringBuilder();
+				foreach (var file in options.Files)
+				{
+					sb.Append(File.ReadAllText(file));
+				}
+				input = sb.ToString();
 			}
 
-			try
+			switch (options.Type)
 			{
-				switch (options.Type)
-				{
-					case "yaml": return YamlConverter.Decode(vm, input);
-					case "json": return Converters.JsonConverter.Decode(vm, input);
-					default:
-						Console.WriteLine($"Invalid file type");
-						return null;
-				}
-			}
-			catch (Exception e) when (e is not WatsonException)
-			{
-				Console.WriteLine($"Failed to decode watson: {e.Message}");
-				return null;
+				case "yaml": return YamlConverter.Decode(vm, input);
+				case "json": return Converters.JsonConverter.Decode(vm, input);
+				default:
+					return null;
 			}
 		}
 	}

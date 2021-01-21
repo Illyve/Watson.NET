@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace Watson
 {
 	static class WatsonGen
 	{
-		public static string Generate(object value) => Generate(value, new Lexer());
-		public static string Generate(object value, Lexer lexer)
+		public static string Generate(object value) => Generate(value, new VM());
+		public static string Generate(object value, VM vm)
 		{
 			IEnumerable<Operation> ops = GenerateAny(value);
-			IEnumerable<char> chars = lexer.GetCharacters(ops);
+			IEnumerable<char> chars = vm.Lexer.GetCharacters(ops);
 			return new String(chars.ToArray());
 		}
 
-		private static IEnumerable<Operation> GenerateAny(object value)
+		public static IEnumerable<Operation> GenerateAny(object value)
 		{
 			switch (value)
 			{
@@ -26,10 +27,11 @@ namespace Watson
 				case double val: return GenerateFloat(val);
 				case string val: return GenerateString(val);
 				case Dictionary<string, object> val: return GenerateObject(val);
-				case Array val: return GenerateArray(val.Cast<object>().ToArray());
+				case List<object> val: return GenerateArray(val);
 				case bool val: return GenerateBool(val);
 				case null: return GenerateNil();
-				default: return new List<Operation>();
+				default: 
+					return new List<Operation>();
 			}
 		}
 
@@ -123,11 +125,11 @@ namespace Watson
 			return ops;
 		}
 
-		private static IEnumerable<Operation> GenerateArray(object[] value)
+		private static IEnumerable<Operation> GenerateArray(List<object> value)
 		{
 			var ops = new List<Operation>();
 			ops.Add(Operations.Anew);
-			for (int i = 0; i < value.Length; i++)
+			for (int i = 0; i < value.Count; i++)
 			{
 				ops.AddRange(GenerateAny(value[i]));
 				ops.Add(Operations.Aadd);

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Watson
 {
@@ -17,6 +16,18 @@ namespace Watson
 
 		public LexerMode Mode { get; set; }
 
+		public Lexer(char mode)
+		{
+			if (mode == 'A')
+			{
+				Mode = LexerMode.A;
+			}
+			else
+			{
+				Mode = LexerMode.S;
+			}
+		}
+
 		public Lexer(LexerMode mode = LexerMode.A)
 		{
 			Mode = mode;
@@ -30,6 +41,22 @@ namespace Watson
 				if (op is not null)
 				{
 					yield return op;
+				}
+			}
+		}
+
+		public IEnumerable<Operation> GetOperations(StreamReader reader)
+		{
+			var chars = new char[1024];
+			while (reader.ReadBlock(chars) != 0)
+			{
+				for (int i = 0; i < chars.Length; i++)
+				{
+					Operation op = GetOperation(chars[i]);
+					if (op is not null)
+					{
+						yield return op;
+					}
 				}
 			}
 		}

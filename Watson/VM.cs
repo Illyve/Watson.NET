@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Watson
 {
@@ -39,6 +38,14 @@ namespace Watson
 		public void Run(string instructions)
 		{
 			foreach (Operation op in Lexer.GetOperations(instructions))
+			{
+				op?.Invoke(this);
+			}
+		}
+
+		public void Run(StreamReader reader)
+		{
+			foreach (Operation op in Lexer.GetOperations(reader))
 			{
 				op?.Invoke(this);
 			}

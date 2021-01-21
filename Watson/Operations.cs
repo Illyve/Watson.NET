@@ -96,7 +96,7 @@ namespace Watson
 
 		public static Operation Oadd => vm =>
 		{
-			object v = vm.Pop<object>();
+			object v = vm.Pop();
 			string k = vm.Pop<string>();
 			Dictionary<string, object> o = vm.Pop<Dictionary<string, object>>();
 			o[k] = v;
