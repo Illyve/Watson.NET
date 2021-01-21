@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Watson.NET
+namespace Watson
 {
 	static class WatsonGen
 	{
@@ -119,6 +118,7 @@ namespace Watson.NET
 			{
 				ops.AddRange(GenerateString(key));
 				ops.AddRange(GenerateAny(value[key]));
+				ops.Add(Operations.Oadd);
 			}
 			return ops;
 		}

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Watson.NET
+namespace Watson
 {
 	public class Lexer
 	{
@@ -16,6 +16,11 @@ namespace Watson.NET
 		}
 
 		public LexerMode Mode { get; set; }
+
+		public Lexer(LexerMode mode = LexerMode.A)
+		{
+			Mode = mode;
+		}
 
 		public IEnumerable<Operation> GetOperations(string instructions)
 		{

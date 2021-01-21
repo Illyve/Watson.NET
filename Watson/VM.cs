@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Watson.NET
+namespace Watson
 {
 
 
@@ -22,9 +22,19 @@ namespace Watson.NET
 
 	public class VM
 	{
-		public Lexer Lexer { get; set; } = new Lexer();
+		public Lexer Lexer { get; set; }
 		
 		private Stack<object> stack = new Stack<object>();
+
+		public VM()
+		{
+			Lexer = new Lexer();
+		}
+
+		public VM(Lexer lexer)
+		{
+			Lexer = lexer;
+		}
 
 		public void Run(string instructions)
 		{
@@ -38,15 +48,20 @@ namespace Watson.NET
 
 		public object Pop()
 		{
-			return stack.Pop();
+			object x;
+			if (!stack.TryPop(out x))
+			{
+				throw new EmptyStackException("The top of the stack is empty");
+			}
+			return x;
 		}
 
 		public T Pop<T>()
 		{
-			object x = stack.Pop();
+			object x = Pop();
 			if (x is not T)
 			{
-				throw new InvalidOperationException($"The top of the stack does not contain the expected value {nameof(T)}");
+				throw new UnexpectedTypeException($"The top of the stack does not contain the expected value {nameof(T)}");
 			}
 			return (T)x;
 		}
