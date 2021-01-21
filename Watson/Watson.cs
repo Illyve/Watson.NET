@@ -14,24 +14,52 @@ namespace Watson
 	{
 		public static string Encode(EncodeOptions options)
 		{
-			var vm = new VM(new Lexer(options.InitialMode));
+			var vm = new VM(options.InitialMode);
 
-			string input;
-			if (options.File == null || !File.Exists(options.File))
+			Converter converter = ConverterFactory.GetConverter(options.Type);
+
+			string output;
+			if (options.File == null)
 			{
-				input = Console.ReadLine();
+				string input = Console.ReadLine();
+				output = converter.Encode(input, vm);
 			}
 			else
 			{
-				input = File.ReadAllText(options.File);
+				using (var fileStream = new FileStream(options.File, FileMode.Open))
+				{
+					using (var streamReader = new StreamReader(fileStream))
+					{
+						output = converter.Encode(streamReader.ReadToEnd(), vm);
+					}
+				}
 			}
+			return output;
+		}
 
-			switch (options.Type)
+		public static void Encode(EncodeOptions options, Stream stream)
+		{
+			var vm = new VM(options.InitialMode);
+
+			Converter converter = ConverterFactory.GetConverter(options.Type);
+
+			using (var writer = new StreamWriter(stream))
 			{
-				case "yaml": return YamlConverter.Encode(vm, input);
-				case "json": return Converters.JsonConverter.Encode(vm, input);
-				default:
-					return null;
+				if (options.File == null)
+				{
+					string input = Console.ReadLine();
+					writer.Write(converter.Encode(input, vm));
+				}
+				else
+				{
+					using (var fileStream = new FileStream(options.File, FileMode.Open))
+					{
+						using (var reader = new StreamReader(fileStream))
+						{
+							converter.Encode(reader, writer, vm);
+						}
+					}
+				}
 			}
 		}
 
@@ -39,27 +67,62 @@ namespace Watson
 		{
 			var vm = new VM(new Lexer(options.InitialMode));
 
+			Converter converter = ConverterFactory.GetConverter(options.Type);
+
 			string input;
+			string output = null;
+
 			if (options.Files.Count() == 0)
 			{
 				input = Console.ReadLine();
+				output = converter.Decode(input, vm);
 			}
 			else
 			{
 				var sb = new StringBuilder();
 				foreach (var file in options.Files)
 				{
-					sb.Append(File.ReadAllText(file));
+					using (var fileStream = new FileStream(file, FileMode.Open))
+					{
+						using (var reader = new StreamReader(fileStream))
+						{
+							output = converter.Decode(reader.ReadToEnd(), vm);
+						}
+					}
 				}
-				input = sb.ToString();
 			}
+			return output;
+		}
 
-			switch (options.Type)
+		public static void Decode(DecodeOptions options, Stream output)
+		{
+			var vm = new VM(new Lexer(options.InitialMode));
+
+			Converter converter = ConverterFactory.GetConverter(options.Type);
+
+			string input;
+
+			using (var writer = new StreamWriter(output))
 			{
-				case "yaml": return YamlConverter.Decode(vm, input);
-				case "json": return Converters.JsonConverter.Decode(vm, input);
-				default:
-					return null;
+				if (options.Files.Count() == 0)
+				{
+					input = Console.ReadLine();
+					writer.Write(converter.Decode(input, vm));
+				}
+				else
+				{
+					var sb = new StringBuilder();
+					foreach (var file in options.Files)
+					{
+						using (var fileStream = new FileStream(file, FileMode.Open))
+						{
+							using (var reader = new StreamReader(fileStream))
+							{
+								 converter.Decode(reader, writer, vm);
+							}
+						}
+					}
+				}
 			}
 		}
 	}

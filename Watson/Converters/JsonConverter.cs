@@ -5,13 +5,12 @@ using System.IO;
 using System.Dynamic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text.Json;
 
 namespace Watson.Converters
 {
-	public static class JsonConverter
+	public class JsonConverter : Converter
 	{
-		public static string Decode(VM vm, string watson)
+		public override string Decode(string watson, VM vm)
 		{
 			vm.Run(watson);
 			object x = vm.Pop();
@@ -22,7 +21,7 @@ namespace Watson.Converters
 			return JsonConvert.SerializeObject(x);
 		}
 
-		public static string Decode(VM vm, StreamReader reader)
+		public override void Decode(StreamReader reader, StreamWriter writer, VM vm)
 		{
 			vm.Run(reader);
 			object x = vm.Pop();
@@ -30,14 +29,24 @@ namespace Watson.Converters
 			{
 				throw new InvalidFormatException("The input is not in a valid json format");
 			}
-			return JsonConvert.SerializeObject(x);
+
+			var serializer = JsonSerializer.CreateDefault();
+			serializer.Serialize(writer, x);
 		}
 
-		public static string Encode(VM vm, string json)
+		public override string Encode(string input, VM vm)
 		{
-			object obj = JsonConvert.DeserializeObject(json);
+			object obj = JsonConvert.DeserializeObject(input);
 			obj = JsonToWatson(obj);
 			return WatsonGen.Generate(obj, vm);
+		}
+
+		public override void Encode(StreamReader reader, StreamWriter writer, VM vm)
+		{
+			var serializer = JsonSerializer.CreateDefault();
+			object obj = serializer.Deserialize(reader, typeof(object));
+			obj = JsonToWatson(obj);
+			WatsonGen.Generate(writer, obj, vm);
 		}
 
 		private static object JsonToWatson(object obj)

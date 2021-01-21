@@ -30,6 +30,11 @@ namespace Watson
 			Lexer = new Lexer();
 		}
 
+		public VM(char mode)
+		{
+			Lexer = new Lexer(mode);
+		}
+
 		public VM(Lexer lexer)
 		{
 			Lexer = lexer;

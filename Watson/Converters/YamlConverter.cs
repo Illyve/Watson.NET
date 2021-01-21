@@ -7,28 +7,36 @@ using YamlDotNet.Core;
 
 namespace Watson.Converters
 {
-	public static class YamlConverter
+	public class YamlConverter : Converter
 	{
-		public static string Decode(VM vm, string watson)
+		public override string Decode(string watson, VM vm)
 		{
-			var serializer = new SerializerBuilder().Build();
 			vm.Run(watson);
-			return serializer.Serialize(vm.Pop()).Trim();
-		}
-
-		public static string Decode(VM vm, StreamReader reader)
-		{
 			var serializer = new SerializerBuilder().Build();
-			vm.Run(reader);
 			return serializer.Serialize(vm.Pop()).Trim();
 		}
 
-		public static string Encode(VM vm, string yaml)
+		public override void Decode(StreamReader reader, StreamWriter writer, VM vm)
+		{
+			vm.Run(reader);
+			var serializer = new SerializerBuilder().Build();
+			serializer.Serialize(writer, vm.Pop());
+		}
+
+		public override string Encode(string input, VM vm)
 		{
 			var deserializer = new DeserializerBuilder().Build();
-			object obj = deserializer.Deserialize<object>(yaml);
+			object obj = deserializer.Deserialize<object>(input);
 			obj = YamlToWatson(obj);
 			return WatsonGen.Generate(obj, vm);
+		}
+
+		public override void Encode(StreamReader reader, StreamWriter writer, VM vm)
+		{
+			var deserializer = new DeserializerBuilder().Build();
+			object obj = deserializer.Deserialize<object>(reader);
+			obj = YamlToWatson(obj);
+			WatsonGen.Generate(writer, obj, vm);
 		}
 
 		private static object YamlToWatson(object obj)

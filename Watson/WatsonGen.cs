@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using Newtonsoft.Json.Linq;
 
 namespace Watson
@@ -14,6 +15,16 @@ namespace Watson
 			IEnumerable<Operation> ops = GenerateAny(value);
 			IEnumerable<char> chars = vm.Lexer.GetCharacters(ops);
 			return new String(chars.ToArray());
+		}
+
+		public static void Generate(StreamWriter writer, object value, VM vm)
+		{
+			IEnumerable<Operation> ops = GenerateAny(value);
+			IEnumerable<char> chars = vm.Lexer.GetCharacters(ops);
+			foreach (var character in chars)
+			{
+				writer.Write(character);
+			}
 		}
 
 		public static IEnumerable<Operation> GenerateAny(object value)

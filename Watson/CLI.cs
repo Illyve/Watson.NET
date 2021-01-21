@@ -43,15 +43,10 @@ namespace Watson
 		{
 			var parser = new CommandLine.Parser(settings => settings.HelpWriter = null);
 			var result = parser.ParseArguments<EncodeOptions, DecodeOptions>(args);
-			string output = result.MapResult(
-				(EncodeOptions options) => Watson.Encode(options),
-				(DecodeOptions options) => Watson.Decode(options),
-				(errs) => { DisplayHelp(result); return null; });
-
-			if (output != null)
-			{
-				Console.WriteLine(output);
-			}
+			int output = result.MapResult(
+				(EncodeOptions options) => { Watson.Encode(options, Console.OpenStandardOutput()); return 0; },
+				(DecodeOptions options) => { Watson.Decode(options, Console.OpenStandardOutput()); return 0; },
+				(errs) => { DisplayHelp(result); return 1; });
 		}
 
 		static void DisplayHelp<T>(ParserResult<T> result)

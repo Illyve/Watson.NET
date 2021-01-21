@@ -2,7 +2,7 @@
   "profiles": {
     "Watson.NET": {
       "commandName": "Project",
-      "commandLineArgs": "encode -t yaml yaml.txt"
+      "commandLineArgs": "decode -t yaml watson.txt watson.txt"
     }
   }
 }
