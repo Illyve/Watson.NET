@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using CommandLine;
+using CommandLine.Text;
 using Watson.Converters;
 using YamlDotNet.Core;
 using Newtonsoft.Json;
@@ -18,7 +19,7 @@ namespace Watson
 		[Option("initial-mode", Required = false, HelpText = "Specifies the initial mode of the lexer", Default = 'A')]
 		public char InitialMode { get; set; }
 
-		[Value(0, Required = false, HelpText = "The file to be converted. Will use standard input if not provided")]
+		[Value(0, MetaName = "file", Required = false, HelpText = "The file to be converted. Will use standard input if not provided")]
 		public string File { get; set; }
 	}
 
@@ -31,7 +32,7 @@ namespace Watson
 		[Option("initial-mode", Required = false, HelpText = "Specifies the initial mode of the lexer", Default = 'A')]
 		public char InitialMode { get; set; }
 
-		[Value(0, Required = false, HelpText = "The files to be converted, Will use standard input if not provided")]
+		[Value(0, MetaName = "file", Required = false, HelpText = "The files to be converted, Will use standard input if not provided")]
 		public IEnumerable<string> Files { get; set; }
 	}
 
@@ -39,16 +40,30 @@ namespace Watson
 	{
 		public static void Main(string[] args)
 		{
-			var result = CommandLine.Parser.Default.ParseArguments<EncodeOptions, DecodeOptions>(args)
-				.MapResult(
-					(EncodeOptions options) => Encode(options),
-					(DecodeOptions options) => Decode(options),
-					(errs) => null);
+			var parser = new CommandLine.Parser(settings => settings.HelpWriter = null);
+			var result = parser.ParseArguments<EncodeOptions, DecodeOptions>(args);
+			string output = result.MapResult(
+				(EncodeOptions options) => Encode(options),
+				(DecodeOptions options) => Decode(options),
+				(errs) => { DisplayHelp(result); return null; });
 
-			if (result != null)
+			if (output != null)
 			{
-				Console.WriteLine(result);
+				Console.WriteLine(output);
 			}
+		}
+
+		static void DisplayHelp<T>(ParserResult<T> result)
+		{
+			var helpText = HelpText.AutoBuild(result, h =>
+			{
+				h.AdditionalNewLineAfterOption = false;
+				h.Heading = "Watson v0.1.0";
+				h.Copyright = "";
+				return h;
+			});
+
+			Console.WriteLine(helpText);
 		}
 
 		public static string Encode(EncodeOptions options)

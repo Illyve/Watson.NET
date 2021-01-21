@@ -2,7 +2,7 @@
   "profiles": {
     "Watson.NET": {
       "commandName": "Project",
-      "commandLineArgs": "decode -t json"
+      "commandLineArgs": "encode"
     }
   }
 }
