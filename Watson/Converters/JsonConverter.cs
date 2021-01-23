@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Dynamic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Watson.Converters
 {
@@ -53,20 +50,22 @@ namespace Watson.Converters
 		{
 			switch (obj)
 			{
-				case JObject jsonObj: 
+				case JObject jsonObj:
 					var wObj = jsonObj.ToObject<Dictionary<string, object>>();
 					foreach (var key in wObj.Keys)
 					{
 						wObj[key] = JsonToWatson(wObj[key]) ?? wObj[key];
 					}
 					return wObj;
-				case JArray jsonArr: 
+
+				case JArray jsonArr:
 					var wArr = jsonArr.ToObject<List<object>>();
 					for (int i = 0; i < wArr.Count; i++)
 					{
 						wArr[i] = JsonToWatson(wArr[i]) ?? wArr[i];
 					}
 					return wArr;
+
 				default: return null;
 			}
 		}

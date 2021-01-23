@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Watson.Converters
+﻿namespace Watson.Converters
 {
-	static class ConverterFactory
+	internal static class ConverterFactory
 	{
 		public static Converter GetConverter(string converterType)
 		{

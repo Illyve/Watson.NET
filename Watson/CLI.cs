@@ -1,13 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-using CommandLine;
+﻿using CommandLine;
 using CommandLine.Text;
-using Watson.Converters;
-using YamlDotNet.Core;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Watson
 {
@@ -49,7 +43,7 @@ namespace Watson
 				(errs) => { DisplayHelp(result); return 1; });
 		}
 
-		static void DisplayHelp<T>(ParserResult<T> result)
+		private static void DisplayHelp<T>(ParserResult<T> result)
 		{
 			var helpText = HelpText.AutoBuild(result, h =>
 			{

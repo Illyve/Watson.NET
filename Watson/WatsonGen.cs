@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
-using Newtonsoft.Json.Linq;
 
 namespace Watson
 {
-	static class WatsonGen
+	internal static class WatsonGen
 	{
 		public static string Generate(object value) => Generate(value, new VM());
+
 		public static string Generate(object value, VM vm)
 		{
 			IEnumerable<Operation> ops = GenerateAny(value);
@@ -41,7 +41,7 @@ namespace Watson
 				case List<object> val: return GenerateArray(val);
 				case bool val: return GenerateBool(val);
 				case null: return GenerateNil();
-				default: 
+				default:
 					return new List<Operation>();
 			}
 		}

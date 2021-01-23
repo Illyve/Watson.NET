@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Watson
 {
+	/// <summary>
+	/// <para>
+	/// Provides a class for converting characters to Watson operations
+	/// </para>
+	/// </summary>
 	public class Lexer
 	{
-
 		public enum LexerMode
 		{
 			A,
@@ -33,6 +35,11 @@ namespace Watson
 			Mode = mode;
 		}
 
+		/// <summary>
+		/// Gets the operations that <paramref name="instructions"/> performs"/>
+		/// </summary>
+		/// <param name="instructions">The list of instructions</param>
+		/// <returns>The operations</returns>
 		public IEnumerable<Operation> GetOperations(string instructions)
 		{
 			for (int i = 0; i < instructions.Length; i++)
@@ -45,6 +52,11 @@ namespace Watson
 			}
 		}
 
+		/// <summary>
+		/// Get the Watson instructions from a stream and returns its operations
+		/// </summary>
+		/// <param name="reader">The input stream</param>
+		/// <returns>The operations</returns>
 		public IEnumerable<Operation> GetOperations(StreamReader reader)
 		{
 			var chars = new char[1024];
@@ -61,6 +73,11 @@ namespace Watson
 			}
 		}
 
+		/// <summary>
+		/// Gets the Watson representation of <paramref name="operations"/>
+		/// </summary>
+		/// <param name="operations">The operations</param>
+		/// <returns>The Watson Representation of <paramref name="operations"/></returns>
 		public IEnumerable<char> GetCharacters(IEnumerable<Operation> operations)
 		{
 			foreach (Operation op in operations)
@@ -69,6 +86,11 @@ namespace Watson
 			}
 		}
 
+		/// <summary>
+		/// Gets the operation of a Watson instruction
+		/// </summary>
+		/// <param name="letter"></param>
+		/// <returns></returns>
 		public Operation GetOperation(char letter)
 		{
 			if (Mode == LexerMode.A)
@@ -139,7 +161,7 @@ namespace Watson
 				case 'm': return Operations.Finf;
 				case 'b': return Operations.Fnan;
 				case 'u': return Operations.Fneg;
-				case '$': FlipMode();  return Operations.Snew;
+				case '$': FlipMode(); return Operations.Snew;
 				case '-': return Operations.Sadd;
 				case '+': return Operations.Onew;
 				case 'g': return Operations.Oadd;
@@ -170,10 +192,11 @@ namespace Watson
 				case "Finf": return Mode == LexerMode.A ? 'q' : 'm';
 				case "Fnan": return Mode == LexerMode.A ? 't' : 'b';
 				case "Fneg": return Mode == LexerMode.A ? 'p' : 'u';
-				case "Snew": 
+				case "Snew":
 					char c = Mode == LexerMode.A ? '?' : '$';
 					FlipMode();
 					return c;
+
 				case "Sadd": return Mode == LexerMode.A ? '!' : '-';
 				case "Onew": return Mode == LexerMode.A ? '~' : '+';
 				case "Oadd": return Mode == LexerMode.A ? 'M' : 'g';

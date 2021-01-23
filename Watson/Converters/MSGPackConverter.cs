@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 
 namespace Watson.Converters
 {
-	class MSGPackConverter : Converter
+	internal class MSGPackConverter : Converter
 	{
 		public override string Decode(string watson, VM vm)
 		{

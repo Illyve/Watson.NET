@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using YamlDotNet.Serialization;
-using YamlDotNet.Core;
 
 namespace Watson.Converters
 {

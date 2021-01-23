@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Watson
 {
-
-
-	enum WatsonType
+	internal enum WatsonType
 	{
 		Int,
 		UInt,
@@ -19,10 +15,15 @@ namespace Watson
 		Nil
 	}
 
+	/// <summary>
+	/// <para>
+	/// Provides the vm that all watson processing occurs in
+	/// </para>
+	/// </summary>
 	public class VM
 	{
 		public Lexer Lexer { get; set; }
-		
+
 		private Stack<object> stack = new Stack<object>();
 
 		public VM()

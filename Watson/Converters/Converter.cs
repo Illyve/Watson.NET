@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
+﻿using System.IO;
 
 namespace Watson.Converters
 {
+	/// <summary>
+	/// <para>
+	/// Provides the abstract base class for all watson converters
+	/// </para>
+	/// </summary>
 	public abstract class Converter
 	{
 		public abstract string Decode(string watson, VM vm);

@@ -1,17 +1,23 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using YamlDotNet.Serialization;
-using YamlDotNet.Core;
-using Newtonsoft.Json;
+using System.Text;
 using Watson.Converters;
 
 namespace Watson
 {
+	/// <summary>
+	/// Provides the methods for all Watson processing
+	/// </summary>
 	public static class Watson
 	{
+		/// <summary>
+		/// <para>Encodes the input to Watson Representation using <paramref name="options"/> and outputs it to the standard output.
+		/// Will read from the standard input if the file isn't specified
+		/// </para>
+		/// </summary>
+		/// <param name="options">The encoding options</param>
+		/// <returns>A string containing the input's Watson Representation</returns>
 		public static string Encode(EncodeOptions options)
 		{
 			var vm = new VM(options.InitialMode);
@@ -37,6 +43,13 @@ namespace Watson
 			return output;
 		}
 
+		/// <summary>
+		/// <para>
+		/// Encodes the input to Watson Representation using <paramref name="options"/> and stores it in <paramref name="stream"/>
+		/// </para>
+		/// </summary>
+		/// <param name="options">The encoding options</param>
+		/// <param name="stream">The output stream</param>
 		public static void Encode(EncodeOptions options, Stream stream)
 		{
 			var vm = new VM(options.InitialMode);
@@ -63,6 +76,14 @@ namespace Watson
 			}
 		}
 
+		/// <summary>
+		/// <para>
+		/// Decodes the input from Watson Representation to the specified format in <paramref name="options"/> and outputs it to the standard output
+		/// Will read from the standard input if no files are specified
+		/// </para>
+		/// </summary>
+		/// <param name="options">The decoding options</param>
+		/// <returns>A string containing the Watson input in the specified format</returns>
 		public static string Decode(DecodeOptions options)
 		{
 			var vm = new VM(new Lexer(options.InitialMode));
@@ -94,6 +115,13 @@ namespace Watson
 			return output;
 		}
 
+		/// <summary>
+		/// <para>
+		/// Decodes the input from Watson Representation to the specified format in <paramref name="options"/> and stores it in <paramref name="stream"/>
+		/// </para>
+		/// </summary>
+		/// <param name="options">The decoing options</param>
+		/// <param name="stream">The output stream</param>
 		public static void Decode(DecodeOptions options, Stream output)
 		{
 			var vm = new VM(new Lexer(options.InitialMode));
@@ -118,7 +146,7 @@ namespace Watson
 						{
 							using (var reader = new StreamReader(fileStream))
 							{
-								 converter.Decode(reader, writer, vm);
+								converter.Decode(reader, writer, vm);
 							}
 						}
 					}
